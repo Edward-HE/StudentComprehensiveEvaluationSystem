@@ -48,7 +48,7 @@ typedef struct Stuinfo {
 void Wrong(int a, int b);
 void main_menu(Stu* l, Stu* p, Stu* r);
 void teacher_account(Stu* l, Stu* p, Stu* r);
-void stu_menu();
+void stu_menu(Stu* l);
 void about_us();
 int pswd_check();
 char mod_pswd();
@@ -66,6 +66,8 @@ void Modify_info(Stu* l);
 void Modify_score(Stu* l);
 void Sort(Stu* l, int sel);
 void Del(Stu* l);
+void Stu_score_feedback(Stu* p);
+void look_feedback();
 int main();
 
 void Wrong(int a, int b) /*输出按键错误信息*/
@@ -207,11 +209,22 @@ void Sort(Stu* l, int sel)
 					p = pre->next;
 				}
 			}
-							
+
 			p = p->next;
 			pre = pre->next;
 		}
 		tail = p;
+	}
+	p = l->next;           /*已排好序的头指针赋给p，准备填写名次*/
+	while (p != NULL)  /*当p不为空时，进行下列操作*/
+	{
+		if (sel == 1)
+			p->rank_main = i;
+		else if (sel == 2)
+			p->rank_all = i;
+		i++;       /*结点序号*/
+		p = p->next;   /*指针后移*/
+
 	}
 	Save(l);
 	system("cls");
@@ -234,7 +247,7 @@ void main_menu(Stu* l, Stu* p, Stu* r) {
 		scanf("%c", &option);
 		switch (option) {
 		case '1':system("cls"); teacher_account(l, p, r); system("cls"); break;
-		case '2':system("cls"); stu_menu(); system("cls"); break;
+		case '2':system("cls"); stu_menu(l); system("cls"); getchar(); break;
 		case '3':system("cls"); about_us(); system("pause"); getchar(); system("cls"); break;
 		case '4':exit(0);
 		default:Wrong(1, 4); system("pause"); getchar(); system("cls"); break;
@@ -362,8 +375,33 @@ void Disp(Stu* l, int i)  /*显示单链表l中存储的教师记录，内容为teacher结构中定义
 	{
 		if (i == 0)
 			printinfo(p);
-		else
+		else if(i==1)
 			printscore(p);
+		else if (i == 2)
+		{
+			printf(HEADER2);
+			printf(FORMAT2, DATA2);
+			printf(HEADER4);
+			printf(FORMAT4, DATA4);
+		}
+		else if (i == 3)
+		{
+			printf(HEADER2);
+			printf(FORMAT2, DATA2);
+			printf(HEADER5);
+			printf(FORMAT5, DATA5);
+		}
+		else if (i == 4)
+		{
+			printf(HEADER1);
+			printf(FORMAT1, DATA1);
+			printf(HEADER3);
+			printf(FORMAT3, DATA3);
+			printf(HEADER4);
+			printf(FORMAT4, DATA4);
+			printf(HEADER5);
+			printf(FORMAT5, DATA5);
+		}
 		p = p->next;  /*移动直下一个结点*/
 		printf(END);
 	}
@@ -633,12 +671,12 @@ temp_del:
 		getchar();
 		printf("=====>%s 的信息还未被录入，要不要换一个呢？(y/n):", find_data);
 		scanf("%c", &chy);
-		if (chy == 'y' || chy == 'Y') 
+		if (chy == 'y' || chy == 'Y')
 		{
 			system("cls");
 			goto temp_del;
 		}
-		else 
+		else
 		{
 			system("cls");
 			return;
@@ -792,6 +830,20 @@ temp:
 	}
 }
 
+void look_feedback()
+{
+	FILE* fp;
+	fp = fopen("score_feedback.dat", "a+");
+	printf("学生成绩申诉反馈信息\n");
+	while (!feof(fp))
+		putchar(fgetc(fp));
+	fclose(fp);
+	printf("\n\n");
+	system("pause");
+	system("cls");
+	return;
+}
+
 void teacher_main_menu(Stu* l, Stu* p, Stu* r) {
 	int option;
 	while (1) {
@@ -821,11 +873,11 @@ void teacher_main_menu(Stu* l, Stu* p, Stu* r) {
 		case 4:system("cls"); Sort(l, 0); Disp(l, 0); system("pause"); system("cls"); break;
 		case 5:Add_score(l); Sort(l, 1); Sort(l, 2); Sort(l, 0); system("cls"); break;
 		case 6:Modify_score(l); Sort(l, 1); Sort(l, 2); Sort(l, 0); system("cls"); break;
-		case 7:system("cls"); Disp(l, 1); system("pause"); system("cls"); break;
-		case 8:
-		case 9:Sort(l, 1); system("cls"); Disp(l, 1); system("pause"); system("cls"); break;
-		case 10:Sort(l, 2); system("cls"); Disp(l, 1); system("pause"); system("cls"); break;
-		case 11:Sort(l, 0); system("cls");
+		case 7:system("cls"); Sort(l, 0); Disp(l, 1); system("pause"); system("cls"); break;
+		case 8:system("cls"); look_feedback(); break;
+		case 9:Sort(l, 1); system("cls"); Disp(l, 2); system("pause"); system("cls"); break;
+		case 10:Sort(l, 2); system("cls"); Disp(l, 3); system("pause"); system("cls"); break;
+		case 11:Sort(l, 0); Disp(l, 4); system("pause"); system("cls"); break;
 		default:Wrong(0, 11); system("pause"); system("cls"); break;
 		}
 
@@ -835,12 +887,101 @@ void teacher_main_menu(Stu* l, Stu* p, Stu* r) {
 	system("pause");
 }
 
-void stu_menu() 
+void Stu_score_feedback(Stu* p)
 {
-	printf("===================================\n");
-	printf("\t学生系统界面\n");
-	printf("\n请输入学号：");
+	FILE* fp;
+	char i;
+	fp = fopen("score_feedback.dat", "ab+");
+	printf("如果你对你的成绩有疑问，可以在这里给老师留言反馈。\n");
+	printf("直接按i键开始输入反馈，按其他键可返回：\n");
+	i = getch();
+	if (i != 'i')
+	{
+		fclose(fp);
+		system("cls");
+		return;
+	}
+	else
+	{
+		system("cls");
+		printf("请输入你的申诉留言，完成后按回车键结束：\n");
+		fputs("------------------------------------\n", fp);
+		char fdbk[512], tmp2[256];
+		memset(tmp2, 0, sizeof(tmp2));
+		time_t timep;
+		struct tm* t;
+		time(&timep);
+		t = gmtime(&timep);
+		sprintf(tmp2, "%d年%d月%d日 %d:%d:%d\n学号：%s 姓名：%s\n", 1900 + t->tm_year, 1 + t->tm_mon, t->tm_mday, 8 + t->tm_hour, t->tm_min, t->tm_sec, p->num, p->name);//记录反馈时间
+		fwrite(tmp2, 1, strlen(tmp2), fp);
+		scanf("%s", fdbk);
+		fputs(fdbk, fp);
+		fputs("\n------------------------------------\n", fp);
+		fclose(fp);
+		printf("====>成绩申诉已提交给老师，请耐心等待。");
+		system("pause");
+		system("cls");
+		return;
+	}
+}
 
+void stu_menu(Stu* l)
+{
+
+	Stu* p, * t;  /*实现添加操作的临时的结构体指针变量*/
+	char find_data[20];
+	char chy;
+temp_stu:
+	printf("===================================\n");
+	printf("\t学生系统登录界面\n");
+	if (!l->next)
+	{
+		system("cls");
+		printf("\n=====>No teacher record!\n");
+		getchar();
+		return;
+	}
+	stringinput(find_data, 15, "请输入学号："); /*输入并检验该编号*/
+	p = Locate(l, find_data, 0); /*查询到该节点*/
+	if (p) /*若p!=NULL,表明已经找到该节点*/
+	{
+		int i;
+		while (1)
+		{
+			system("cls");
+			printf("=============================================\n");
+			printf("\n   %s %s", p->num, p->name);
+			printf("\n\t1.成绩查询\n");
+			printf("\n\t2.成绩申诉\n");
+			printf("\n\t3.返回登录\n");
+			printf("\n\t0.退出系统\n");
+			printf("\t请输入对应序号[0-3]: \n");
+			printf("\n=============================================\n");
+			scanf("%d", &i);
+			switch (i) {
+			case 1:system("cls"); printscore(p); system("pause"); system("cls"); break;
+			case 2:system("cls"); Stu_score_feedback(p); break;
+			case 3:system("cls");  goto temp_stu; break;
+			case 0:exit(0);
+			default:Wrong(0, 3); system("pause"); system("cls");
+			}
+
+		}
+	}
+	else
+	{
+		getchar();
+		printf("=====>学号 %s 不存在，要不要换一个呢？(y/n):", find_data);
+		scanf("%c", &chy);
+		if (chy == 'y' || chy == 'Y') {
+			system("cls");
+			goto temp_stu;
+		}
+		else {
+			system("cls");
+			return;
+		}
+	}
 }
 void about_us() {
 	printf("==============================================\n");
@@ -859,7 +1000,7 @@ void about_us() {
 
 int main() {
 	Stu* l;      /*定义链表*/
-	FILE* fp;    /*文件指针*/
+	FILE* fp, * fpp;    /*文件指针*/
 	int select;     /*保存选择结果变量*/
 	char ch;     /*保存(y,Y,n,N)*/
 	int count = 0; /*保存文件中的记录条数（或结点个数）*/
@@ -876,6 +1017,13 @@ int main() {
 	r = l;
 	fp = fopen("student_info.dat", "ab+"); /*以追加方式打开一个二进制文件，可读可写，若此文件不存在，会创建此文件*/
 	if (fp == NULL)
+	{
+		printf("\n=====>无法打开文件，请重试！\n");
+		exit(0);
+	}
+
+	fpp = fopen("score_feedback.dat", "ab+"); /*以追加方式打开一个二进制文件，可读可写，若此文件不存在，会创建此文件*/
+	if (fpp == NULL)
 	{
 		printf("\n=====>无法打开文件，请重试！\n");
 		exit(0);
@@ -900,7 +1048,7 @@ int main() {
 	}
 
 	fclose(fp); /*关闭文件*/
-	//printf("\n=====>open file sucess,the total records number is : %d.\n", count);
+	fclose(fpp);
 
 	system("color 8F");
 	main_menu(l, p, r);
