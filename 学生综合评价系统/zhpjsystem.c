@@ -9,14 +9,14 @@
 #define HEADER0 "     -----------------------------------------------------------  \n"
 #define HEADER1 "     |     学 号     |    姓  名    | 性别 |    联 系 电 话    |\n"
 #define FORMAT1 "     |%-15s|    %-10s|  %-4s|    %-15s|\n"
-#define HEADER2 "     |     学 号     |   姓 名   |\n"
-#define FORMAT2 "     |%-15s|%-10s |\n"
+#define HEADER2 "     |     学 号     |   姓 名    |\n"
+#define FORMAT2 "     |%-15s|%-10s  |\n"
 #define HEADER3 "     |  家 庭 住 址  |"
-#define FORMAT3 "     %-35s |\n"
-#define HEADER4 "     |语文|数学|英语|平均分|名次1|\n"
-#define FORMAT4 "     |%-4d|%-4d|%-4d|%-6lf|%-4d |\n"
-#define HEADER5 "     |思品|互评|师评|综合分|名次2|\n"
-#define FORMAT5 "     |%-4d|%-4d|%-4d|%-6lf|%-4d |\n"
+#define FORMAT3 "    %-35s |\n"
+#define HEADER4 "     | 语文|数学|英语|平均分|名次1|\n"
+#define FORMAT4 "     | %-4d|%-4d|%-4d|%-6.2lf| %-4d|\n"
+#define HEADER5 "     | 思品|互评|师评|综合分|名次2|\n"
+#define FORMAT5 "     | %-4d|%-4d|%-4d|%-6.2lf| %-4d|\n"
 
 
 #define DATA1   p->num,p->name,p->sex,p->phone
@@ -45,6 +45,8 @@ typedef struct Stuinfo {
 	struct Stuinfo* next;
 }Stu;
 //------------------------------- 函数声明------------------------------------
+void color(short x);
+void toxy(int x, int y);
 void Wrong(int a, int b);
 void main_menu(Stu* l, Stu* p, Stu* r);
 void teacher_account(Stu* l, Stu* p, Stu* r);
@@ -69,6 +71,25 @@ void Del(Stu* l);
 void Stu_score_feedback(Stu* p);
 void look_feedback();
 int main();
+
+void color(short x)
+{
+	if (x >= 0 && x <= 15)
+	{
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), x);
+	}
+	else
+	{
+		SetConsoleTextAttribute(GetStdHandle(STD_OUTPUT_HANDLE), x);
+	}
+}
+
+void toxy(int x, int y)      //将光标移动到X,Y坐标处
+{
+	COORD pos = { x , y };
+	HANDLE Out = GetStdHandle(STD_OUTPUT_HANDLE);
+	SetConsoleCursorPosition(Out, pos);
+}
 
 void Wrong(int a, int b) /*输出按键错误信息*/
 {
@@ -165,6 +186,16 @@ Stu* Locate(Stu* l, char find_data[], int type_find)
 
 void Sort(Stu* l, int sel)
 {
+	Stu* temp1;
+	temp1 = l->next; /*l存储的是单链表中头结点的指针，该头结点没有存储教师信息，指针域指向的后继结点才有教师信息*/
+	if (!temp1)  /*p==NULL,NUll在stdlib中定义为0*/
+	{
+		printf("\n\t\t\t\t\t\t=====>文件中没有数据！\n");
+		getchar();
+		system("pause");
+		system("cls");
+		return;
+	}
 	Stu* p, * pre, * tail, * temp;
 	tail = NULL;
 	pre = l;
@@ -235,22 +266,30 @@ void Sort(Stu* l, int sel)
 void main_menu(Stu* l, Stu* p, Stu* r) {
 	char option;
 	while (1) {
-		printf("=============================================\n");
-		printf("\n\t      学生综合测评系统\n\n");
-		printf("\t1.教师账户");
-		printf("\t2.学生账户\n\n");
-		printf("\t3.关于我们");
-		printf("\t4.退出系统\n\n");
-		printf("\t      请输入对应序号: \n");
-		printf("\n=============================================\n");
+		color(11);
+		toxy(35, 12);
+		printf("==================================================");
+		toxy(52, 14);
+		printf("学生综合测评系统");
+		toxy(48, 18);
+		printf("1.教师账户");
+		printf("\t2.学生账户");
+		toxy(48, 20);
+		printf("3.关于我们");
+		printf("\t0.退出系统");
+		toxy(52, 22);
+		printf("请输入对应序号: ");
+		toxy(35, 24);
+		printf("==================================================");
 		p = r;
+		toxy(60, 25);
 		scanf("%c", &option);
 		switch (option) {
 		case '1':system("cls"); teacher_account(l, p, r); system("cls"); break;
-		case '2':system("cls"); stu_menu(l); system("cls"); getchar(); break;
+		case '2':system("cls"); stu_menu(l); system("cls");  break;
 		case '3':system("cls"); about_us(); system("pause"); getchar(); system("cls"); break;
-		case '4':exit(0);
-		default:Wrong(1, 4); system("pause"); getchar(); system("cls"); break;
+		case '0':exit(0);
+		default:Wrong(0, 3); system("pause"); getchar(); system("cls"); break;
 		}
 	}
 }
@@ -259,14 +298,22 @@ void teacher_account(Stu* l, Stu* p, Stu* r) {
 	pswd_create();			//每次进入后确认一次是否存在密码文件		
 	int i;
 	while (1) {
-		printf("=============================================\n");
-		printf("\n\t      欢迎使用\n\n");
-		printf("\t1.登	录");
-		printf("\t2.修改密码\n\n");
-		printf("\t3.返回主菜单");
-		printf("\t4.退出系统\n\n");
-		printf("\t      请输入对应序号: \n");
-		printf("\n=============================================\n");
+		color(11);
+		toxy(35, 12);
+		printf("==================================================");
+		toxy(44, 14);
+		printf("欢迎使用学生综合测评系统(教师端)");
+		toxy(48, 18);
+		printf("1.登	录");
+		printf("\t2.修改密码");
+		toxy(48, 20);
+		printf("3.返回主菜单");
+		printf("\t4.退出系统");
+		toxy(52, 22);
+		printf("请输入对应序号：");
+		toxy(35, 24);
+		printf("==================================================");
+		toxy(60, 25);
 		scanf("%d", &i);
 		switch (i) {
 		case 1:system("cls"); login_teacher(l, p, r); break;
@@ -285,19 +332,30 @@ void login_teacher(Stu* l, Stu* p, Stu* r) {
 	FILE* fp;
 	fp = fopen("pswd_teacher", "r"); //打开储存密码的文件
 	fgets(a, 16, fp);	 //读取密码到数组a中
-	printf("===================================\n");
-	printf("\t教师登录界面\n");
+	toxy(35, 12);
+	printf("==================================================");
+	toxy(57, 14);
+	printf("教师登录界面");
 	if (strcmp(a, a1) == 0) {	 //判断是否为初始密码
-		printf("  您仍在使用初始密码，请及时更改密码\n");
+		toxy(51, 15);
+		printf("您仍在使用初始密码，请及时更改密码！");
 	}
-	printf("\n请输入密码：");
+	toxy(54, 16);
+	printf("请输入密码：");
 	pswd_check();
 	if (check_result == 1) {
-		printf("\n\n登录成功！即将进入教师端\n");
-		printf("\n===================================\n");
+		toxy(48, 22);
+		printf("登录成功！即将进入教师端");
+		toxy(35, 24);
+		printf("==================================================");
+		toxy(54, 26);
 		system("pause");
 		system("cls");
 		teacher_main_menu(l, p, r);
+	}
+	else if (check_result == 0)
+	{
+		return;
 	}
 	fclose(fp);
 }
@@ -312,43 +370,59 @@ int pswd_check() {		//检测密码正确性
 	while (1) {
 		if (strcmp(a, b) == 0) {
 			check_result = 1;//检测通过
+			fclose(fp);
 			return (check_result);
 		}
 		else {
-			printf("\n密码不正确，请重新输入，您还有%d次机会\n", i);
+			toxy(41, 18);
+			printf("密码不正确，请重新输入，您还有%d次机会!\n", i);
+			toxy(54, 20);
 			printf("请输入密码：");
 			i--;
 			scanf("%s", &a);
 		}
 		if (i == 0) {
+			toxy(45, 22);
 			printf("您已输错超过3次，即将返回主界面\n");
-			printf("\n===================================\n");
+			toxy(35, 24);
+			printf("==================================================");
+			fclose(fp);
+			toxy(54, 26);
 			system("pause");
 			system("cls");
-			main();
+			check_result = 0;
+			return (check_result);
 		}
 	}
-	fclose(fp);
 }
 
 char mod_pswd() {	//修改密码
 	char b[16];		//临时储存新密码的变量
 	FILE* fp;
-
-	printf("===================================\n");
-	printf("\t教师端密码修改\n");
+	toxy(35, 12);
+	printf("==================================================");
+	toxy(53, 14);
+	printf("教师端密码修改");
+	toxy(53, 16);
 	printf("请输入旧密码：");
 	pswd_check();
+	if (check_result == 0)
+		return;
+	toxy(53, 22);
 	printf("请输入新密码：");
 	fp = fopen("pswd_teacher", "w");
 	scanf("%s", &b);
 	fputs(b, fp);
 	fclose(fp);
+	toxy(53, 24);
 	printf("请确认新密码：");
 	pswd_check();
 	if (check_result == 1) {
-		printf("\n\n修改密码成功！\n");
-		printf("\n===================================\n");
+		toxy(53, 26);
+		printf("修改密码成功！");
+		toxy(35, 28);
+		printf("==================================================");
+		toxy(54, 30);
 		system("pause");
 		system("cls");
 		return;
@@ -363,46 +437,69 @@ void Disp(Stu* l, int i)  /*显示单链表l中存储的教师记录，内容为teacher结构中定义
 
 	if (!p)  /*p==NULL,NUll在stdlib中定义为0*/
 	{
-		printf("\n=====>Not teacher record!\n");
+		system("cls");
+		toxy(49, 12);
+		printf("=====>文件中没有数据！\n");
 		getchar();
+		toxy(54, 14);
+		system("pause");
 		return;
 	}
 
 	printf("\n\n");
+	toxy(27, 4);
 	printf(HEADER);
+	toxy(27, 5);
 	printf(HEADER0);
 	while (p)    /*逐条输出链表中存储的教师信息*/
 	{
 		if (i == 0)
 			printinfo(p);
-		else if(i==1)
+		else if (i == 1)
 			printscore(p);
 		else if (i == 2)
 		{
+			printf("\t\t\t   ");
 			printf(HEADER2);
+			printf("\t\t\t   ");
 			printf(FORMAT2, DATA2);
+			printf("\t\t\t   ");
 			printf(HEADER4);
+			printf("\t\t\t   ");
 			printf(FORMAT4, DATA4);
 		}
 		else if (i == 3)
 		{
+			printf("\t\t\t   ");
 			printf(HEADER2);
+			printf("\t\t\t   ");
 			printf(FORMAT2, DATA2);
+			printf("\t\t\t   ");
 			printf(HEADER5);
+			printf("\t\t\t   ");
 			printf(FORMAT5, DATA5);
 		}
 		else if (i == 4)
 		{
+			printf("\t\t\t   ");
 			printf(HEADER1);
+			printf("\t\t\t   ");
 			printf(FORMAT1, DATA1);
+			printf("\t\t\t   ");
 			printf(HEADER3);
+			printf("\t\t\t   ");
 			printf(FORMAT3, DATA3);
+			printf("\t\t\t   ");
 			printf(HEADER4);
+			printf("\t\t\t   ");
 			printf(FORMAT4, DATA4);
+			printf("\t\t\t   ");
 			printf(HEADER5);
+			printf("\t\t\t   ");
 			printf(FORMAT5, DATA5);
 		}
 		p = p->next;  /*移动直下一个结点*/
+		printf("\t\t\t   ");
 		printf(END);
 	}
 	getchar();
@@ -412,8 +509,11 @@ void printinfo(Stu* pp) /*格式化输出表中数据*/
 {
 	Stu* p;
 	p = pp;
+	printf("\t\t\t   ");
 	printf(HEADER1);
+	printf("\t\t\t   ");
 	printf(FORMAT1, DATA1);
+	printf("\t\t\t   ");
 	printf(HEADER3);
 	printf(FORMAT3, DATA3);
 }
@@ -524,7 +624,7 @@ temp:
 	if (!l->next)
 	{
 		system("cls");
-		printf("\n=====>No teacher record!\n");
+		printf("\n\t\t\t\t\t\t=====>文件中没有数据！\n");
 		getchar();
 		return;
 	}
@@ -604,7 +704,7 @@ temp_del:
 	if (!l->next)
 	{
 		system("cls");
-		printf("\n=====>No teacher record!\n");
+		printf("\n\t\t\t\t\t\t=====>文件中没有数据！\n");
 		getchar();
 		return;
 	}
@@ -693,7 +793,7 @@ void Add_score(Stu* l)
 	if (!l->next)
 	{
 		system("cls");
-		printf("\n=====>No teacher record!\n");
+		printf("\n\t\t\t\t\t\t=====>文件中没有数据！\n");
 		getchar();
 		return;
 	}
@@ -755,7 +855,7 @@ temp:
 	if (!l->next)
 	{
 		system("cls");
-		printf("\n=====>No teacher record!\n");
+		printf("\n\t\t\t\t\t\t=====>文件中没有数据！\n");
 		getchar();
 		return;
 	}
@@ -847,22 +947,36 @@ void look_feedback()
 void teacher_main_menu(Stu* l, Stu* p, Stu* r) {
 	int option;
 	while (1) {
-		printf("===================================\n");
-		printf("\n\t欢迎使用学生综合测评系统\n\n");
-		printf("-----学生信息管理-----   -----学生成绩管理-----\n");
-		printf("|                    |   |                    |\n");
-		printf("|  1. 添加学生信息   |   |  5. 录入成绩数据   |\n");
-		printf("|  2. 修改学生信息   |   |  6. 修改成绩数据   |\n");
-		printf("|  3. 删除学生信息   |   |  7. 查看成绩信息   |\n");
-		printf("|  4. 查看学生信息   |   |  8. 查看成绩反馈   |\n");
-		printf("|                    |   |                    |\n");
-		printf("----------------------   ----------------------\n\n");
-		printf("   9. 排名（平均分）       10. 排名（综合分）\n");
-		printf("  11. 显示全部学生数据      0. 退出系统\n");
-		printf("\n请输入你的选择（0--11）：\n");
-		printf("\n===================================\n");
-
+		toxy(35, 5);
+		printf("==================================================");
+		toxy(44, 7);
+		printf("欢迎使用学生综合测评系统(教师端)");
+		toxy(36, 10);
+		printf("-----学生信息管理-----   -----学生成绩管理-----");
+		toxy(36, 11);
+		printf("|                    |   |                    |");
+		toxy(36, 12);
+		printf("|  1. 添加学生信息   |   |  5. 录入成绩数据   |");
+		toxy(36, 13);
+		printf("|  2. 修改学生信息   |   |  6. 修改成绩数据   |");
+		toxy(36, 14);
+		printf("|  3. 删除学生信息   |   |  7. 查看成绩信息   |");
+		toxy(36, 15);
+		printf("|  4. 查看学生信息   |   |  8. 查看成绩反馈   |");
+		toxy(36, 16);
+		printf("|                    |   |                    |");
+		toxy(36, 17);
+		printf("----------------------   ----------------------");
+		toxy(36, 19);
+		printf("   9. 排名（平均分）       10. 排名（综合分）");
+		toxy(36, 20);
+		printf("  11. 显示全部学生数据      0. 退出系统");
+		toxy(47, 22);
+		printf("请输入你的选择（0--11）：");
+		toxy(35, 24);
+		printf("==================================================");
 		p = r;
+		toxy(60, 25);
 		scanf("%d", &option);
 		switch (option)
 		{
@@ -932,15 +1046,21 @@ void stu_menu(Stu* l)
 	char find_data[20];
 	char chy;
 temp_stu:
-	printf("===================================\n");
-	printf("\t学生系统登录界面\n");
+	toxy(35, 12);
+	printf("==================================================");
+	toxy(52, 14);
+	printf("学生系统登录界面");
 	if (!l->next)
 	{
 		system("cls");
-		printf("\n=====>No teacher record!\n");
+		toxy(49, 12);
+		printf("=====>暂时没有学生数据！");
 		getchar();
+		toxy(54, 14);
+		system("pause");
 		return;
 	}
+	toxy(50, 16);
 	stringinput(find_data, 15, "请输入学号："); /*输入并检验该编号*/
 	p = Locate(l, find_data, 0); /*查询到该节点*/
 	if (p) /*若p!=NULL,表明已经找到该节点*/
@@ -949,14 +1069,22 @@ temp_stu:
 		while (1)
 		{
 			system("cls");
-			printf("=============================================\n");
-			printf("\n   %s %s", p->num, p->name);
-			printf("\n\t1.成绩查询\n");
-			printf("\n\t2.成绩申诉\n");
-			printf("\n\t3.返回登录\n");
-			printf("\n\t0.退出系统\n");
-			printf("\t请输入对应序号[0-3]: \n");
-			printf("\n=============================================\n");
+			toxy(35, 12);
+			printf("==================================================");
+			toxy(44, 14);
+			printf("欢迎使用学生综合测评系统(学生端)");
+			toxy(47, 15);
+			printf("%15s %-10s", p->num, p->name);
+			toxy(48, 18);
+			printf("1.成绩查询");
+			printf("\t2.成绩申诉");
+			toxy(48, 20);
+			printf("\t3.返回登录");
+			printf("\t0.退出系统");
+			toxy(50, 22);
+			printf("请输入对应序号[0-3]：");
+			toxy(35, 24);
+			printf("==================================================");
 			scanf("%d", &i);
 			switch (i) {
 			case 1:system("cls"); printscore(p); system("pause"); system("cls"); break;
@@ -984,7 +1112,7 @@ temp_stu:
 	}
 }
 void about_us() {
-	printf("==============================================\n");
+	printf("==================================================");
 	printf("\n\t      关  于  我  们\n\n");
 	printf("      系统为适用于小学生的四则运算练习系统，\n");
 	printf("  系统由C语言编写，可以进行100以内的四则运算\n");
@@ -994,7 +1122,7 @@ void about_us() {
 	printf("  习的错题。\n");
 	printf("\n\t   Powered by Edward_du\n");
 	printf("\n\t   \t2019.4.19\n");
-	printf("\n==============================================\n");
+	printf("==================================================");
 
 }
 
@@ -1049,8 +1177,8 @@ int main() {
 
 	fclose(fp); /*关闭文件*/
 	fclose(fpp);
+	system("mode con cols=120 lines=40");
 
-	system("color 8F");
 	main_menu(l, p, r);
 
 }
