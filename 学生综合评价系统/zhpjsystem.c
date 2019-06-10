@@ -5,13 +5,14 @@
 #include<stdlib.h>
 #include<time.h>
 #include<math.h>
-#define HEADER0 "      ----------------------------学生列表---------------------------  \n"
-#define HEADER1 "     |     学 号     |   姓 名   | 性别 |    联 系 电 话     |\n"
-#define FORMAT1 "     |%-15s|%-10s |%-6s|%-14s |\n"
+#define HEADER  "                             **学生列表**\n"
+#define HEADER0 "     -----------------------------------------------------------  \n"
+#define HEADER1 "     |     学 号     |    姓  名    | 性别 |    联 系 电 话    |\n"
+#define FORMAT1 "     |%-15s|    %-10s|  %-4s|    %-15s|\n"
 #define HEADER2 "     |     学 号     |   姓 名   |\n"
 #define FORMAT2 "     |%-15s|%-10s |\n"
 #define HEADER3 "     |  家 庭 住 址  |"
-#define FORMAT3 "     %-30s |\n"
+#define FORMAT3 "     %-35s |\n"
 #define HEADER4 "     |语文|数学|英语|平均分|名次1|\n"
 #define FORMAT4 "     |%-4d|%-4d|%-4d|%-6lf|%-4d |\n"
 #define HEADER5 "     |思品|互评|师评|综合分|名次2|\n"
@@ -24,7 +25,7 @@
 #define DATA4   p->chinese,p->math,p->english,p->average,p->rank_main
 #define DATA5   p->pinde,p->huping,p->teacher,p->score_all,p->rank_all
 
-#define END     "      --------------------------------------------------------------  \n"
+#define END     "     -----------------------------------------------------------  \n"
 //------------------------------- 定义全局变量------------------------------------
 int check_result = 0;		//记录检测结果的变量
 //------------------------------- 定义学生数据结构体------------------------------------
@@ -32,7 +33,7 @@ typedef struct Stuinfo {
 	char num[15];			//学号
 	char name[10];		//学生名字
 	char sex[4];		//性别
-	char address[30];	//家庭住址
+	char address[35];	//家庭住址
 	char phone[14];		//电话
 	int chinese, math, english, pinde;	//语、数、英、思想品德成绩
 	int rank_main, rank_all;			//语数英三科名次，综合测评名次
@@ -44,7 +45,7 @@ typedef struct Stuinfo {
 	struct Stuinfo* next;
 }Stu;
 //------------------------------- 函数声明------------------------------------
-void Wrong();
+void Wrong(int a, int b);
 void main_menu(Stu* l, Stu* p, Stu* r);
 void teacher_account(Stu* l, Stu* p, Stu* r);
 void stu_menu();
@@ -63,14 +64,15 @@ void printscore(Stu* pp);
 void Save(Stu* l);
 void Modify_info(Stu* l);
 void Modify_score(Stu* l);
-void Sort(Stu* l,int sel);
+void Sort(Stu* l, int sel);
+void Del(Stu* l);
 int main();
 
-void Wrong() /*输出按键错误信息*/
+void Wrong(int a, int b) /*输出按键错误信息*/
 {
 	system("cls");
 	printf("=========================================\n");
-	printf("\n\n\n请选择1-4四个选项之一，请不要输入其他选项！\n\n\n");
+	printf("\n\n\n请选择%d-%d中的选项之一，请不要输入其他选项！\n\n\n", a, b);
 	printf("\n=========================================\n\n\n\n");
 }
 
@@ -98,7 +100,7 @@ void Save(Stu* l)
 	fp = fopen("student_info.dat", "wb");/*以只写方式打开二进制文件*/
 	if (fp == NULL) /*打开文件失败*/
 	{
-		printf("\n=====>open file error!\n");
+		printf("\n=====>打开错误！\n");
 		getchar();
 		return;
 	}
@@ -118,14 +120,12 @@ void Save(Stu* l)
 	}
 	if (count > 0)
 	{
-		getchar();
-		printf("\n\n\n\n\n=====>save file complete,total saved's record number is:%d\n", count);
-		getchar();
+
 	}
 	else
 	{
 		system("cls");
-		printf("the current link is empty,no teacher record is saved!\n");
+		printf("没有信息被保存！\n");
 		getchar();
 	}
 	fclose(fp); /*关闭此文件*/
@@ -161,82 +161,61 @@ Stu* Locate(Stu* l, char find_data[], int type_find)
 	return 0; /*若未找到，返回一个空指针*/
 }
 
-void Sort(Stu* l,int sel)
+void Sort(Stu* l, int sel)
 {
-	Stu* ll;
-	Stu* p, * rr, * s;
-	int sel;
-	//int i=0;
-	if (l->next == NULL)
+	Stu* p, * pre, * tail, * temp;
+	tail = NULL;
+	pre = l;
+	int i = 1;
+	p = (Stu*)malloc(sizeof(Stu));
+	while ((l->next->next) != tail)
 	{
-		system("cls");
-		printf("\n=====>Not teacher record!\n");
-		getchar();
-		return;
-	}
-
-	ll = (Stu*)malloc(sizeof(Stu)); /*用于创建新的节点*/
-	if (!ll)
-	{
-		printf("\n allocate memory failure "); /*如没有申请到，打印提示信息*/
-		return;             /*返回主界面*/
-	}
-	ll->next = NULL;
-	system("cls");
-	p = l->next;
-	while (p) /*p!=NULL*/
-	{
-		s = (Stu*)malloc(sizeof(Stu)); /*新建节点用于保存从原链表中取出的节点信息*/
-		if (!s) /*s==NULL*/
+		p = l->next;
+		pre = l;
+		while (p->next != tail)
 		{
-			printf("\n allocate memory failure "); /*如没有申请到，打印提示信息*/
-			return;             /*返回主界面*/
-		}
-		s= p; /*填数据域*/
-		s->next = NULL;    /*指针域为空*/
-		rr = ll;
-		/*rr链表于存储插入单个节点后保持排序的链表，ll是这个链表的头指针,每次从头开始查找插入位置*/
-		if (sel == 1) {
-			while (rr->next != NULL && rr->next->average >= p->average)
+			if (sel == 0)
 			{
-				rr = rr->next;
-			} /*指针移至实发工资比p所指的节点的实发工资小的节点位置*/
-		}
-
-		if (sel == 2) {
-			while (rr->next != NULL && rr->next->score_all >= p->score_all)
+				if (strcmp(p->next->num, p->num) < 0)
+				{
+					pre->next = p->next;
+					temp = p->next->next;
+					p->next->next = p;
+					p->next = temp;
+					p = pre->next;
+				}
+			}
+			else if (sel == 1)
 			{
-				rr = rr->next;
-			} /*指针移至实发工资比p所指的节点的实发工资小的节点位置*/
-		}
-
-		if (sel == 0) {
-			while (rr->next != NULL && strcmp(rr->next->num, p->num) == -1)
+				if ((p->average) < (p->next->average))
+				{
+					pre->next = p->next;
+					temp = p->next->next;
+					p->next->next = p;
+					p->next = temp;
+					p = pre->next;
+				}
+			}
+			else if (sel == 2)
 			{
-				rr = rr->next;
-			} /*指针移至实发工资比p所指的节点的实发工资小的节点位置*/
+				if ((p->score_all) < (p->next->score_all))
+				{
+					pre->next = p->next;
+					temp = p->next->next;
+					p->next->next = p;
+					p->next = temp;
+					p = pre->next;
+				}
+			}
+							
+			p = p->next;
+			pre = pre->next;
 		}
-
-		if (rr->next == NULL)/*若新链表ll中的所有节点的实发工资值都比p->data.total大时，就将p所指节点加入链表尾部*/
-			rr->next = s;
-		else /*否则将该节点插入至第一个实发工资字段比它小的节点的前面*/
-		{
-			s->next = rr->next;
-			rr->next = s;
-		}
-		p = p->next; /*原链表中的指针下移一个节点*/
+		tail = p;
 	}
-
-	l->next = ll->next; /*ll中存储是的已排序的链表的头指针*/
-	p = l->next;           /*已排好序的头指针赋给p，准备填写名次*/
-	while (p != NULL)  /*当p不为空时，进行下列操作*/
-	{
-		//i++;       /*结点序号*/
-		p = p->next;   /*指针后移*/
-
-	}
-	printf("\n    =====>sort complete!\n");
 	Save(l);
+	system("cls");
+	return;
 }
 
 //----------------------------------------首页面----------------------------------------
@@ -258,7 +237,7 @@ void main_menu(Stu* l, Stu* p, Stu* r) {
 		case '2':system("cls"); stu_menu(); system("cls"); break;
 		case '3':system("cls"); about_us(); system("pause"); getchar(); system("cls"); break;
 		case '4':exit(0);
-		default:Wrong(); system("pause"); getchar(); system("cls"); break;
+		default:Wrong(1, 4); system("pause"); getchar(); system("cls"); break;
 		}
 	}
 }
@@ -281,7 +260,7 @@ void teacher_account(Stu* l, Stu* p, Stu* r) {
 		case 2:system("cls"); mod_pswd(); break;
 		case 3:system("cls"); getchar(); return;
 		case 4:exit(0);
-		default:Wrong(); system("pause"); system("cls");
+		default:Wrong(1, 4); system("pause"); system("cls");
 		}
 
 	}
@@ -377,6 +356,7 @@ void Disp(Stu* l, int i)  /*显示单链表l中存储的教师记录，内容为teacher结构中定义
 	}
 
 	printf("\n\n");
+	printf(HEADER);
 	printf(HEADER0);
 	while (p)    /*逐条输出链表中存储的教师信息*/
 	{
@@ -492,10 +472,8 @@ void Add_info(Stu* l)
 		p->next = NULL; /*表明这是链表的尾部结点*/
 		r->next = p;  /*将新建的结点加入链表尾部中*/
 		r = p;
-		//saveflag = 1;
-
 	}
-	Save(l);
+
 	return;
 }
 
@@ -578,6 +556,96 @@ temp:
 		}
 	}
 }
+
+void Del(Stu* l)
+{
+	int sel;
+	Stu* p, * r;
+	char find_data[20], chy;
+temp_del:
+	if (!l->next)
+	{
+		system("cls");
+		printf("\n=====>No teacher record!\n");
+		getchar();
+		return;
+	}
+	system("cls");
+	Disp(l, 0);
+	printf("\n        =====>1 按照学号删除   =====>2 按照姓名删除   =====>0 返回上一级\n");
+	printf("       请输入你的选择[0,2]:");
+	scanf("%d", &sel);
+	if (sel == 0)
+		return;
+	else if (sel == 1)
+	{
+		stringinput(find_data, 15, "请输入要删除学生的学号：");
+		p = Locate(l, find_data, 0);
+	}
+	else if (sel == 2) /*先按姓名查询到该记录所在的节点*/
+	{
+		stringinput(find_data, 10, "请输入要删除学生的姓名：");
+		p = Locate(l, find_data, 1);
+	}
+	else
+	{
+		Wrong(1, 2);
+		system("pause");
+		goto temp_del;
+	}
+	if (p)  /*p!=NULL*/
+	{
+		system("cls");
+		printf("已找到该生数据：\n");
+		printf(HEADER1);
+		printf(FORMAT1, DATA1);
+		printf(HEADER3);
+		printf(FORMAT3, DATA3);
+		printf(HEADER4);
+		printf(FORMAT4, DATA4);
+		printf(HEADER5);
+		printf(FORMAT5, DATA5);
+		printf("是否确认删除该条数据？(y/n)：");
+		getchar();
+		scanf("%c", &chy);
+		if (chy == 'y' || chy == 'Y')
+		{
+			r = l;
+			while (r->next != p)
+				r = r->next;
+			r->next = p->next;/*将p所指节点从链表中去除*/
+			free(p); /*释放内存空间*/
+			printf("\n=====>已成功删除！\n");
+			getchar();
+			Save(l);
+			system("pause");
+			system("cls");
+			return;
+		}
+		else
+		{
+			system("cls");
+			goto temp_del;
+		}
+	}
+	else
+	{
+		getchar();
+		printf("=====>%s 的信息还未被录入，要不要换一个呢？(y/n):", find_data);
+		scanf("%c", &chy);
+		if (chy == 'y' || chy == 'Y') 
+		{
+			system("cls");
+			goto temp_del;
+		}
+		else 
+		{
+			system("cls");
+			return;
+		}
+	}
+}
+
 
 void Add_score(Stu* l)
 {
@@ -731,15 +799,14 @@ void teacher_main_menu(Stu* l, Stu* p, Stu* r) {
 		printf("\n\t欢迎使用学生综合测评系统\n\n");
 		printf("-----学生信息管理-----   -----学生成绩管理-----\n");
 		printf("|                    |   |                    |\n");
-		printf("|  1. 添加学生信息   |   |  5. 录入考试成绩   |\n");
-		printf("|  2. 修改学生信息   |   |  6. 录入测评成绩   |\n");
-		printf("|  3. 删除学生信息   |   |  7. 修改成绩数据   |\n");
-		printf("|  4. 查看学生信息   |   |  8. 查看成绩信息   |\n");
+		printf("|  1. 添加学生信息   |   |  5. 录入成绩数据   |\n");
+		printf("|  2. 修改学生信息   |   |  6. 修改成绩数据   |\n");
+		printf("|  3. 删除学生信息   |   |  7. 查看成绩信息   |\n");
+		printf("|  4. 查看学生信息   |   |  8. 查看成绩反馈   |\n");
 		printf("|                    |   |                    |\n");
 		printf("----------------------   ----------------------\n\n");
-		printf("   9. 排名（平均分）      10. 排名（综合分）\n");
-		printf("   9. 显示全部学生数据      10. 排名（综合分）\n");
-		printf("   9. 排名（平均分）      10. 排名（综合分）\n");
+		printf("   9. 排名（平均分）       10. 排名（综合分）\n");
+		printf("  11. 显示全部学生数据      0. 退出系统\n");
 		printf("\n请输入你的选择（0--11）：\n");
 		printf("\n===================================\n");
 
@@ -748,15 +815,18 @@ void teacher_main_menu(Stu* l, Stu* p, Stu* r) {
 		switch (option)
 		{
 		case 0:exit(0);
-		case 1:Add_info(l); break;
-		case 2:Modify_info(l); break;
-		case 3:
-		case 4:system("cls"); Disp(l, 0); system("pause"); break;
-		case 5:Add_score(l); break;
-		case 6:
-		case 7:Modify_score(l);
-		case 8:system("cls"); Disp(l, 1); system("pause"); break;
-
+		case 1:Add_info(l); Sort(l, 0); system("cls"); break;
+		case 2:Modify_info(l); Sort(l, 0); system("cls"); break;
+		case 3:Del(l); system("cls"); break;
+		case 4:system("cls"); Sort(l, 0); Disp(l, 0); system("pause"); system("cls"); break;
+		case 5:Add_score(l); Sort(l, 1); Sort(l, 2); Sort(l, 0); system("cls"); break;
+		case 6:Modify_score(l); Sort(l, 1); Sort(l, 2); Sort(l, 0); system("cls"); break;
+		case 7:system("cls"); Disp(l, 1); system("pause"); system("cls"); break;
+		case 8:
+		case 9:Sort(l, 1); system("cls"); Disp(l, 1); system("pause"); system("cls"); break;
+		case 10:Sort(l, 2); system("cls"); Disp(l, 1); system("pause"); system("cls"); break;
+		case 11:Sort(l, 0); system("cls");
+		default:Wrong(0, 11); system("pause"); system("cls"); break;
 		}
 
 	}
@@ -765,7 +835,11 @@ void teacher_main_menu(Stu* l, Stu* p, Stu* r) {
 	system("pause");
 }
 
-void stu_menu() {
+void stu_menu() 
+{
+	printf("===================================\n");
+	printf("\t学生系统界面\n");
+	printf("\n请输入学号：");
 
 }
 void about_us() {
