@@ -54,6 +54,7 @@ void stu_menu(Stu* l);
 void about_us();
 int pswd_check();
 char mod_pswd();
+Stu* Locate(Stu* l, char find_data[], int type_find);
 void login_teacher(Stu* l, Stu* p, Stu* r);
 void pswd_create();
 void teacher_main_menu(Stu* l, Stu* p, Stu* r);
@@ -389,11 +390,13 @@ void main_menu(Stu* l, Stu* p, Stu* r) {
 	int option;
 	while (1) {
 		option = -1;
-		color(11);
+		color(3);
 		toxy(35, 12);
 		printf("==================================================");
+		color(9);
 		toxy(52, 14);
 		printf("学生综合测评系统");
+		color(3);
 		toxy(48, 18);
 		printf("1.教师账户");
 		printf("\t2.学生账户");
@@ -1277,6 +1280,7 @@ void stu_menu(Stu* l)
 	char find_data[20];
 	char chy;
 temp_stu:
+	color(7);
 	toxy(35, 12);
 	printf("==================================================");
 	toxy(52, 14);
@@ -1375,6 +1379,7 @@ temp_stu:
 }
 //------------------------关于我们----------------------------------
 void about_us() {
+	color(14);
 	toxy(35, 12);
 	printf("==================================================");
 	toxy(53,14);
@@ -1454,7 +1459,6 @@ int main() {
 	fclose(fp); /*关闭文件*/
 	fclose(fpp);
 	system("mode con cols=120");
-
 	main_menu(l, p, r);
 
 }
